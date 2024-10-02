@@ -49,9 +49,9 @@ jobs:
         
     - name: Generate Release Notes
       run: |
-        echo -e '## Checksums\n\n+++' > RELEASE.txt
+        echo -e '## Checksums\n\n```' > RELEASE.txt
         cat dist/sha256sums.txt >> RELEASE.txt
-        echo -e '\n+++\n' >> RELEASE.txt
+        echo -e '\n```\n' >> RELEASE.txt
 
     - name: Release
       uses: softprops/action-gh-release@v2
