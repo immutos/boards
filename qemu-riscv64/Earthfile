@@ -1,0 +1,37 @@
+VERSION 0.8
+FROM debian:bookworm
+WORKDIR /workspace
+ENV DO_NOT_TRACK=1
+
+all:
+  COPY +bootloader/u-boot.bin ./dist/u-boot-qemu-riscv64.bin
+  COPY +linux/ ./dist/
+  SAVE ARTIFACT ./dist/* AS LOCAL dist/ 
+
+linux:
+  COPY +linux-trixie/ ./
+  SAVE ARTIFACT *.deb AS LOCAL ./dist/
+
+linux-trixie:
+  FROM ../util+trixie-base
+  ENV ARCH=riscv
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  COPY linux/config-6.10 .config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-qemu bindeb-pkg
+  WORKDIR /workspace
+  RUN mv linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_riscv64.deb /workspace/original.deb \
+    && usrmerger -o /workspace/linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_riscv64.deb /workspace/original.deb \
+    && rm /workspace/original.deb
+  SAVE ARTIFACT /workspace/linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
+
+bootloader:
+  FROM ../util+bootloader-base
+  WORKDIR /workspace/u-boot
+  COPY u-boot/patches/ ./patches/
+  RUN for p in ./patches/*.diff; do patch -p1 < $p; done && rm -rf ./patches
+  COPY u-boot/config .config
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  SAVE ARTIFACT u-boot.bin AS LOCAL dist/u-boot-qemu-riscv64.bin
