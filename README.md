@@ -1,3 +1,3 @@
 # boards
 
-Board Support Packages For Various Open Platforms
+Board support packages for various open platforms.
