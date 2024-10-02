@@ -241,10 +241,11 @@ CONFIG_BOOTDELAY=2
 # CONFIG_FDT_FIXUP_PARTITIONS is not set
 # CONFIG_FDT_SIMPLEFB is not set
 CONFIG_ARCH_FIXUP_FDT_MEMORY=y
-# CONFIG_USE_BOOTARGS is not set
+CONFIG_USE_BOOTARGS=y
+CONFIG_BOOTARGS="root=/dev/vda ro matchstick.volatile=yes"
 # CONFIG_BOOTARGS_SUBST is not set
 CONFIG_USE_BOOTCOMMAND=y
-CONFIG_BOOTCOMMAND="run distro_bootcmd"
+CONFIG_BOOTCOMMAND="virtio scan; erofsload virtio 0 ${kernel_addr_r} vmlinuz; booti ${kernel_addr_r} - ${fdt_addr}"
 CONFIG_USE_PREBOOT=y
 CONFIG_PREBOOT="setenv fdt_addr ${fdtcontroladdr}; fdt addr ${fdtcontroladdr};"
 CONFIG_PREBOOT_DEFINED=y

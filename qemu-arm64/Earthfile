@@ -38,6 +38,8 @@ linux-trixie:
 bootloader:
   FROM ../util+bootloader-base
   WORKDIR /workspace/u-boot
+  COPY u-boot/patches/ ./patches/
+  RUN for p in ./patches/*.diff; do patch -p1 < $p; done && rm -rf ./patches
   COPY u-boot/config .config
   ENV CROSS_COMPILE=aarch64-linux-gnu-
   RUN make oldconfig
