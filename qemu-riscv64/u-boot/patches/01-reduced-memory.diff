@@ -1,0 +1,23 @@
+--- a/include/configs/qemu-riscv.h	2024-09-30 13:07:22.975964931 +0200
++++ b/include/configs/qemu-riscv.h	2024-09-30 13:08:47.787963043 +0200
+@@ -32,13 +32,13 @@
+ 	CFG_STD_DEVICES_SETTINGS \
+ 	"fdt_high=0xffffffffffffffff\0" \
+ 	"initrd_high=0xffffffffffffffff\0" \
+-	"kernel_addr_r=0x84000000\0" \
+-	"kernel_comp_addr_r=0x88000000\0" \
+-	"kernel_comp_size=0x4000000\0" \
+-	"fdt_addr_r=0x8c000000\0" \
+-	"scriptaddr=0x8c100000\0" \
+-	"pxefile_addr_r=0x8c200000\0" \
+-	"ramdisk_addr_r=0x8c300000\0" \
++	"kernel_addr_r=0x80200000\0" \
++	"kernel_comp_addr_r=0x82200000\0" \
++	"kernel_comp_size=0x1000000\0" \
++	"fdt_addr_r=0x83200000\0" \
++	"scriptaddr=0x83300000\0" \
++	"pxefile_addr_r=0x83400000\0" \
++	"ramdisk_addr_r=0x83500000\0" \
+ 	BOOTENV
+ 
+ #endif /* __CONFIG_H */

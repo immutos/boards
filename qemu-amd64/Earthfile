@@ -1,0 +1,52 @@
+VERSION 0.8
+FROM debian:bookworm
+WORKDIR /workspace
+ENV DO_NOT_TRACK=1
+
+all:
+  COPY +bootloader/coreboot.rom ./dist/u-boot-qemu-amd64.bin
+  COPY +linux/ ./dist/
+  SAVE ARTIFACT ./dist/* AS LOCAL dist/ 
+
+linux:
+  COPY +linux-bookworm/ ./
+  COPY +linux-trixie/ ./
+  SAVE ARTIFACT *.deb AS LOCAL ./dist/
+
+linux-bookworm:
+  FROM ../util+bookworm-base
+  COPY linux/config-6.1 .config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-qemu bindeb-pkg
+  SAVE ARTIFACT /workspace/linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-qemu-1_amd64.deb AS LOCAL ./dist/
+
+linux-trixie:
+  FROM ../util+trixie-base
+  COPY linux/config-6.10 .config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-qemu bindeb-pkg
+  WORKDIR /workspace
+  RUN mv linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_amd64.deb /workspace/original.deb \
+    && usrmerger -o /workspace/linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_amd64.deb /workspace/original.deb \
+    && rm /workspace/original.deb
+  SAVE ARTIFACT /workspace/linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_amd64.deb AS LOCAL ./dist/
+
+# U-Boot as a coreboot payload (coreboot is needed for KVM support).
+bootloader:
+  FROM ../util+bootloader-base
+  RUN ln -s /usr/bin/python3 /usr/bin/python
+  WORKDIR /workspace/coreboot
+  RUN make crossgcc-i386 CPUS=$(nproc)
+  COPY coreboot/config .config
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  WORKDIR /workspace/u-boot
+  COPY u-boot/config .config
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  WORKDIR /workspace/coreboot
+  ENV PATH=$PATH:/workspace/coreboot/build/util/cbfstool
+  RUN cbfstool build/coreboot.rom remove -n fallback/payload \
+    && cbfstool build/coreboot.rom add-flat-binary -f /workspace/u-boot/u-boot-dtb.bin \
+      -n fallback/payload -c lzma -l 0x1110000 -e 0x1110000
+  SAVE ARTIFACT build/coreboot.rom AS LOCAL dist/u-boot-qemu-amd64.bin
