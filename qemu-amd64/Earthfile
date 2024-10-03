@@ -17,19 +17,19 @@ linux-bookworm:
   FROM ../util+bookworm-base
   COPY linux/config-6.1 .config
   RUN make oldconfig
-  RUN make -j $(nproc) LOCALVERSION=-qemu bindeb-pkg
-  SAVE ARTIFACT /workspace/linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-qemu-1_amd64.deb AS LOCAL ./dist/
+  RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_amd64.deb AS LOCAL ./dist/
 
 linux-trixie:
   FROM ../util+trixie-base
   COPY linux/config-6.10 .config
   RUN make oldconfig
-  RUN make -j $(nproc) LOCALVERSION=-qemu bindeb-pkg
+  RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
   WORKDIR /workspace
-  RUN mv linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_amd64.deb /workspace/original.deb \
-    && usrmerger -o /workspace/linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_amd64.deb /workspace/original.deb \
-    && rm /workspace/original.deb
-  SAVE ARTIFACT /workspace/linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_amd64.deb AS LOCAL ./dist/
+  RUN mv linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_amd64.deb original.deb
+  DO ../util+USR_MERGE --src=original.deb --dst=usrmerged.deb
+  DO ../util+ALIAS --src=usrmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_amd64.deb --provides=linux-image-immutos-qemu
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_amd64.deb AS LOCAL ./dist/
 
 # U-Boot as a coreboot payload (coreboot is needed for KVM support).
 bootloader:

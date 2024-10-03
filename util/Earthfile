@@ -1,5 +1,35 @@
 VERSION 0.8
 
+# Perform a Debian UsrMerge on a package.
+USR_MERGE:
+  FUNCTION
+  ARG src
+  ARG dst
+  RUN src=$(realpath "${src}") \
+    && dst=$(realpath "${dst}") \
+    && workdir=$(mktemp -d) \
+    && cd "${workdir}" \
+    && dpkg-deb -x "${src}" . \
+    && dpkg-deb --control "${src}" \
+    && mkdir -p usr \
+    && mv $(find . -maxdepth 1 -name bin -or -name sbin -or -name lib -or -name lib32 -or -name lib64 -or -name libo32 -or -name libx32) usr/ \
+    && dpkg-deb --build . "${dst}"
+
+# Mark a package with a virtual alias.
+ALIAS:
+  FUNCTION
+  ARG src
+  ARG dst
+  ARG provides
+  RUN src=$(realpath "${src}") \
+    && dst=$(realpath "${dst}") \
+    && workdir=$(mktemp -d) \
+    && cd "${workdir}" \
+    && dpkg-deb -x "${src}" . \
+    && dpkg-deb --control "${src}" \
+    && echo "Provides: ${provides}" >> DEBIAN/control \
+    && dpkg-deb --build . "${dst}"
+
 bookworm-base:
   FROM debian:bookworm
   ENV DO_NOT_TRACK=1
@@ -17,15 +47,11 @@ bookworm-base:
 trixie-base:
   FROM debian:trixie
   ENV DO_NOT_TRACK=1
-  RUN apt update \
-    && apt install -y curl \
-    && curl -fL -o /etc/apt/keyrings/apt-immutos-com-keyring.asc https://apt.immutos.com/signing_key.asc \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/apt-immutos-com-keyring.asc] http://apt.immutos.com bookworm stable" > /etc/apt/sources.list.d/apt-immutos-com.list \
-    && apt update
+  RUN apt update
   RUN apt install -y build-essential \
     crossbuild-essential-arm64 g++-riscv64-linux-gnu gcc-riscv64-linux-gnu \
     bc bison flex libssl-dev swig python3 python3-dev python3-setuptools \
-    libncurses-dev libssl-dev libelf-dev curl debhelper fakeroot git usrmerger \
+    libncurses-dev libssl-dev libelf-dev curl debhelper fakeroot git \
     linux-source
   RUN mkdir -p /workspace \
     && tar -xf /usr/src/linux-source-6.10.tar.xz -C /workspace
