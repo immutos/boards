@@ -18,7 +18,10 @@ linux-bookworm:
   COPY linux/config-6.1 .config
   RUN make oldconfig
   RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
-  SAVE ARTIFACT /workspace/linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_amd64.deb AS LOCAL ./dist/
+  WORKDIR /workspace
+  RUN mv linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_amd64.deb original.deb
+  DO ../util+ALIAS --src=original.deb --dst=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_amd64.deb --provides=linux-image-immutos-qemu
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_amd64.deb AS LOCAL ./dist/
 
 linux-trixie:
   FROM ../util+trixie-base
