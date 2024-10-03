@@ -13,6 +13,7 @@ USR_MERGE:
     && dpkg-deb --control "${src}" \
     && mkdir -p usr \
     && rsync -avh $(find . -maxdepth 1 -name bin -or -name sbin -or -name lib -or -name lib32 -or -name lib64 -or -name libo32 -or -name libx32) usr/ \
+    && rm -rf bin sbin lib lib32 lib64 libo32 libx32 \
     && dpkg-deb --build . "${dst}"
 
 META_PACKAGE:
