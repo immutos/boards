@@ -20,9 +20,8 @@ linux-trixie:
   RUN make oldconfig
   RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
   WORKDIR /workspace
-  RUN mv linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb original.deb
-  DO ../util+USR_MERGE --src=original.deb --dst=usrmerged.deb
-  DO ../util+ALIAS --src=usrmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb --provides=linux-image-immutos-qemu
+  RUN mv linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb unmerged.deb
+  DO ../util+USR_MERGE --src=unmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb
   SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
 
 bootloader:

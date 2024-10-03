@@ -15,20 +15,22 @@ USR_MERGE:
     && rsync -avh $(find . -maxdepth 1 -name bin -or -name sbin -or -name lib -or -name lib32 -or -name lib64 -or -name libo32 -or -name libx32) usr/ \
     && dpkg-deb --build . "${dst}"
 
-# Mark a package with a virtual alias.
-ALIAS:
+META_PACKAGE:
   FUNCTION
-  ARG src
-  ARG dst
-  ARG provides
-  RUN src=$(realpath "${src}") \
-    && dst=$(realpath "${dst}") \
+  ARG name
+  ARG version
+  ARG depends
+  RUN outputdir=$(pwd) \
     && workdir=$(mktemp -d) \
     && cd "${workdir}" \
-    && dpkg-deb -x "${src}" . \
-    && dpkg-deb --control "${src}" \
-    && echo "Provides: ${provides}" >> DEBIAN/control \
-    && dpkg-deb --build . "${dst}"
+    && mkdir -p DEBIAN \
+    && echo "Package: ${name}" > DEBIAN/control \
+    && echo "Version: ${version}" >> DEBIAN/control \
+    && echo "Architecture: all" >> DEBIAN/control \
+    && echo "Maintainer: Damian Peckett <damian@pecke.tt>" >> DEBIAN/control \
+    && echo "Description: Linux kernel meta package" >> DEBIAN/control \
+    && echo "Depends: ${depends}" >> DEBIAN/control \
+    && dpkg-deb --build . "${outputdir}/${name}_${version}_${arch}.deb"
 
 bookworm-base:
   FROM debian:bookworm

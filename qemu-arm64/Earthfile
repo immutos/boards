@@ -20,10 +20,7 @@ linux-bookworm:
   COPY linux/config-6.1 .config
   RUN make oldconfig
   RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
-  WORKDIR /workspace
-  RUN mv linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_arm64.deb original.deb
-  DO ../util+ALIAS --src=original.deb --dst=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_arm64.deb --provides=linux-image-immutos-qemu
-  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_arm64.deb AS LOCAL ./dist/
+  SAVE ARTIFACT /workspace/linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_arm64.deb AS LOCAL ./dist/
 
 linux-trixie:
   FROM ../util+trixie-base
@@ -33,9 +30,8 @@ linux-trixie:
   RUN make oldconfig
   RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
   WORKDIR /workspace
-  RUN mv linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_arm64.deb original.deb
-  DO ../util+USR_MERGE --src=original.deb --dst=usrmerged.deb
-  DO ../util+ALIAS --src=usrmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_arm64.deb --provides=linux-image-immutos-qemu
+  RUN mv linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_arm64.deb unmerged.deb
+  DO ../util+USR_MERGE --src=unmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_arm64.deb
   SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_arm64.deb AS LOCAL ./dist/
 
 bootloader:
