@@ -23,7 +23,7 @@ linux-trixie:
   RUN mv linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb original.deb
   DO ../util+USR_MERGE --src=original.deb --dst=usrmerged.deb
   DO ../util+ALIAS --src=usrmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb --provides=linux-image-immutos-qemu
-  SAVE ARTIFACT linux-image-${KERNELVERSION}-qemu_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
 
 bootloader:
   FROM ../util+bootloader-base
