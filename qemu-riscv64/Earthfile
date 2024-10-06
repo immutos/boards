@@ -1,7 +1,6 @@
 VERSION 0.8
 FROM debian:bookworm
 WORKDIR /workspace
-ENV DO_NOT_TRACK=1
 
 all:
   COPY +bootloader/u-boot.bin ./dist/u-boot-qemu-riscv64.bin

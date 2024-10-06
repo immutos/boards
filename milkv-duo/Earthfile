@@ -1,0 +1,47 @@
+VERSION 0.8
+FROM debian:bookworm
+WORKDIR /workspace
+
+all:
+  COPY +bootloader/u-boot.bin ./dist/u-boot-milkv-duo.bin
+  COPY +linux/ ./dist/
+  SAVE ARTIFACT ./* AS LOCAL dist/ 
+
+linux:
+  COPY +linux-trixie/ ./
+  SAVE ARTIFACT *.deb AS LOCAL ./dist/
+
+linux-trixie:
+  FROM ../util+bookworm-base
+  ENV ARCH=riscv
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  WORKDIR /workspace
+  GIT CLONE --branch=cv18xx/for-next https://github.com/sophgo/linux.git linux-source-6.12
+  WORKDIR /workspace/linux-source-6.12
+  ENV KERNELVERSION=$(make kernelversion)
+  ENV GIT_REVISION=$(git rev-parse HEAD | cut -c1-12)
+  COPY linux/config-6.12 .config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-immutos-milkv-duo bindeb-pkg
+  WORKDIR /workspace
+  RUN mv linux-image-${KERNELVERSION}-immutos-milkv-duo-g${GIT_REVISION}_${KERNELVERSION}-g${GIT_REVISION}-1_riscv64.deb unmerged.deb
+  DO ../util+USR_MERGE --src=unmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-milkv-duo-g${GIT_REVISION}_${KERNELVERSION}-g${GIT_REVISION}-1_riscv64.deb
+  DO ../util+META_PACKAGE --name=linux-image-immutos-milkv-duo --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-milkv-duo-g${GIT_REVISION}" --arch=riscv64
+  RUN mv linux-headers-${KERNELVERSION}-immutos-milkv-duo-g${GIT_REVISION}_${KERNELVERSION}-g${GIT_REVISION}-1_riscv64.deb unmerged.deb
+  DO ../util+USR_MERGE --src=unmerged.deb --dst=linux-headers-${KERNELVERSION}-immutos-milkv-duo-g${GIT_REVISION}_${KERNELVERSION}-g${GIT_REVISION}-1_riscv64.deb
+  DO ../util+META_PACKAGE --name=linux-headers-immutos-milkv-duo --version=${KERNELVERSION}-1 --depends="linux-headers-${KERNELVERSION}-immutos-milkv-duo-g${GIT_REVISION}" --arch=all
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-milkv-duo-g${GIT_REVISION}_${KERNELVERSION}-g${GIT_REVISION}-1_riscv64.deb AS LOCAL ./dist/
+  SAVE ARTIFACT linux-image-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
+  SAVE ARTIFACT linux-headers-${KERNELVERSION}-immutos-milkv-duo-g${GIT_REVISION}_${KERNELVERSION}-g${GIT_REVISION}-1_riscv64.deb AS LOCAL ./dist/
+  SAVE ARTIFACT linux-headers-immutos-milkv-duo_${KERNELVERSION}-1_all.deb AS LOCAL ./dist/
+
+bootloader:
+  FROM ../util+bootloader-base
+  WORKDIR /workspace/u-boot
+  COPY u-boot/patches/ ./patches/
+  RUN for p in ./patches/*.diff; do patch -p1 < $p; done && rm -rf ./patches
+  COPY u-boot/config .config
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  SAVE ARTIFACT u-boot.bin AS LOCAL dist/u-boot-milkv-duo.bin

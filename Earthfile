@@ -3,6 +3,7 @@ FROM debian:bookworm
 WORKDIR /workspace
 
 all:
+  COPY ./milkv-duo+all/* ./dist/
   COPY ./qemu-amd64+all/* ./dist/
   COPY ./qemu-arm64+all/* ./dist/
   COPY ./qemu-riscv64+all/* ./dist/
@@ -15,11 +16,11 @@ all:
 linux-bookworm-meta:
   FROM ./util+bookworm-base
   WORKDIR /workspace
-  DO ./util+META_PACKAGE --name=linux-image-immutos-qemu --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-qemu"
+  DO ./util+META_PACKAGE --name=linux-image-immutos-qemu --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-qemu" --arch=all
   SAVE ARTIFACT *.deb AS LOCAL ./dist/
 
 linux-trixie-meta:
   FROM ./util+trixie-base
   WORKDIR /workspace
-  DO ./util+META_PACKAGE --name=linux-image-immutos-qemu --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-qemu"
+  DO ./util+META_PACKAGE --name=linux-image-immutos-qemu --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-qemu" --arch=all
   SAVE ARTIFACT *.deb AS LOCAL ./dist/

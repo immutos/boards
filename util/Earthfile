@@ -21,13 +21,14 @@ META_PACKAGE:
   ARG name
   ARG version
   ARG depends
+  ARG arch
   RUN outputdir=$(pwd) \
     && workdir=$(mktemp -d) \
     && cd "${workdir}" \
     && mkdir -p DEBIAN \
     && echo "Package: ${name}" > DEBIAN/control \
     && echo "Version: ${version}" >> DEBIAN/control \
-    && echo "Architecture: all" >> DEBIAN/control \
+    && echo "Architecture: ${arch}" >> DEBIAN/control \
     && echo "Maintainer: Damian Peckett <damian@pecke.tt>" >> DEBIAN/control \
     && echo "Description: Linux kernel meta package" >> DEBIAN/control \
     && echo "Depends: ${depends}" >> DEBIAN/control \
@@ -35,7 +36,6 @@ META_PACKAGE:
 
 bookworm-base:
   FROM debian:bookworm
-  ENV DO_NOT_TRACK=1
   RUN apt update
   RUN apt install -y build-essential \
     crossbuild-essential-arm64 g++-riscv64-linux-gnu gcc-riscv64-linux-gnu \
@@ -49,7 +49,6 @@ bookworm-base:
 
 trixie-base:
   FROM debian:trixie
-  ENV DO_NOT_TRACK=1
   RUN apt update
   RUN apt install -y build-essential \
     crossbuild-essential-arm64 g++-riscv64-linux-gnu gcc-riscv64-linux-gnu \
@@ -65,4 +64,4 @@ bootloader-base:
   FROM +bookworm-base
   WORKDIR /workspace
   GIT CLONE --branch=24.08 https://github.com/coreboot/coreboot.git coreboot
-  GIT CLONE --branch=v2024.01 https://github.com/u-boot/u-boot.git u-boot
+  GIT CLONE --branch=v2024.07 https://github.com/u-boot/u-boot.git u-boot
