@@ -1,0 +1,14 @@
+VERSION 0.8
+
+sophgo-fsbl:
+  FROM +tools
+  WORKDIR /fsbl
+  COPY upstream/sophgo/fsbl/ ./
+  COPY patches/sophgo/fsbl/ ./patches/
+  RUN for p in ./patches/*.patch; do patch -p1 < $p; done && rm -rf ./patches
+  SAVE ARTIFACT /fsbl/*
+
+tools:
+  FROM debian:bookworm
+  RUN apt update
+  RUN apt install -y patch

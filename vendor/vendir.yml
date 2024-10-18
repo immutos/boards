@@ -1,0 +1,12 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+- path: upstream
+  contents:
+  - path: sophgo/fsbl
+    git:
+      url: https://github.com/sophgo/fsbl.git
+      ref: v4.1.6
+      depth: 1
+    excludePaths:
+    - .git/**/*

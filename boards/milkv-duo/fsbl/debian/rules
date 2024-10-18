@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	make CROSS_COMPILE=riscv64-linux-gnu- clean
+
+override_dh_auto_build:
+	make CROSS_COMPILE=riscv64-linux-gnu- LOADER_2ND_PATH=../u-boot/u-boot.bin -j$(nproc)
+
+override_dh_auto_test:
+	@echo "Skipping tests"
+
+override_dh_auto_install:
+	mkdir -p $(CURDIR)/debian/bootloader-immutos-milkv-duo/boot
+	install -m 644 $(CURDIR)/build/$(CHIP_ARCH)/fip.bin $(CURDIR)/debian/bootloader-immutos-milkv-duo/boot

@@ -1,0 +1,35 @@
+VERSION 0.8
+
+# Perform a Debian UsrMerge on a package.
+USR_MERGE:
+  FUNCTION
+  ARG src
+  ARG dst
+  RUN src=$(realpath "${src}") \
+    && dst=$(realpath "${dst}") \
+    && workdir=$(mktemp -d) \
+    && cd "${workdir}" \
+    && dpkg-deb -x "${src}" . \
+    && dpkg-deb --control "${src}" \
+    && mkdir -p usr \
+    && rsync -avh $(find . -maxdepth 1 -name bin -or -name sbin -or -name lib -or -name lib32 -or -name lib64 -or -name libo32 -or -name libx32) usr/ \
+    && rm -rf bin sbin lib lib32 lib64 libo32 libx32 \
+    && dpkg-deb --build . "${dst}"
+
+META_PACKAGE:
+  FUNCTION
+  ARG name
+  ARG version
+  ARG depends
+  ARG arch
+  RUN outputdir=$(pwd) \
+    && workdir=$(mktemp -d) \
+    && cd "${workdir}" \
+    && mkdir -p DEBIAN \
+    && echo "Package: ${name}" > DEBIAN/control \
+    && echo "Version: ${version}" >> DEBIAN/control \
+    && echo "Architecture: ${arch}" >> DEBIAN/control \
+    && echo "Maintainer: Damian Peckett <damian@pecke.tt>" >> DEBIAN/control \
+    && echo "Description: Linux kernel meta package" >> DEBIAN/control \
+    && echo "Depends: ${depends}" >> DEBIAN/control \
+    && dpkg-deb --build . "${outputdir}/${name}_${version}_${arch}.deb"

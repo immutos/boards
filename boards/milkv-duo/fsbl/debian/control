@@ -1,0 +1,15 @@
+Source: sophgo-fsbl
+Section: admin
+Priority: optional
+Maintainer: Damian Peckett <damian@pecke.tt>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+Standards-Version: 4.6.2
+Homepage: https://github.com/sophgo/fsbl
+
+Package: bootloader-immutos-milkv-duo
+Architecture: riscv64
+Depends: ${misc:Depends}
+Description: Bootloader for the MilkV Duo board
+ This package contains FSBL, OpenSBI, and U-Boot bootloader for the MilkV Duo board.

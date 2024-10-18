@@ -1,0 +1,11 @@
+apiVersion: vendir.k14s.io/v1alpha1
+directories:
+- contents:
+  - git:
+      commitTitle: 'fsbl: weekly rls 2024.08.07...'
+      sha: ca989deb0a36329d2b1799a2295f6544524159c2
+      tags:
+      - v4.1.6
+    path: sophgo/fsbl
+  path: upstream
+kind: LockConfig

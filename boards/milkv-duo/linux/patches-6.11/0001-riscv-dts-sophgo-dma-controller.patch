@@ -1,0 +1,42 @@
+From 514951a81a5e0b8d1deec5e896daf5b30f477b38 Mon Sep 17 00:00:00 2001
+From: Inochi Amaoto <inochiama@outlook.com>
+Date: Fri, 12 Apr 2024 16:33:32 +0800
+Subject: [PATCH] riscv: dts: sophgo: cv18xx: add DMA controller
+
+Add DMA controller dt node for CV18XX/SG200x.
+
+Upstream-Status: Backport [https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=514951a81a5e0b8d1deec5e896daf5b30f477b38]
+Signed-off-by: Damian Peckett <damian@pecke.tt>
+---
+ arch/riscv/boot/dts/sophgo/cv18xx.dtsi | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/arch/riscv/boot/dts/sophgo/cv18xx.dtsi b/arch/riscv/boot/dts/sophgo/cv18xx.dtsi
+index 891932ae4..67f45abd4 100644
+--- a/arch/riscv/boot/dts/sophgo/cv18xx.dtsi
++++ b/arch/riscv/boot/dts/sophgo/cv18xx.dtsi
+@@ -297,6 +297,21 @@ sdhci0: mmc@4310000 {
+ 			status = "disabled";
+ 		};
+ 
++		dmac: dma-controller@4330000 {
++			compatible = "snps,axi-dma-1.01a";
++			reg = <0x04330000 0x1000>;
++			interrupts = <29 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&clk CLK_SDMA_AXI>, <&clk CLK_SDMA_AXI>;
++			clock-names = "core-clk", "cfgr-clk";
++			#dma-cells = <1>;
++			dma-channels = <8>;
++			snps,block-size = <1024 1024 1024 1024
++					   1024 1024 1024 1024>;
++			snps,priority = <0 1 2 3 4 5 6 7>;
++			snps,dma-masters = <2>;
++			snps,data-width = <4>;
++		};
++
+ 		plic: interrupt-controller@70000000 {
+ 			reg = <0x70000000 0x4000000>;
+ 			interrupts-extended = <&cpu0_intc 11>, <&cpu0_intc 9>;
+-- 
+2.39.5
+

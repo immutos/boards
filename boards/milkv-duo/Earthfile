@@ -1,0 +1,67 @@
+VERSION 0.8
+FROM debian:bookworm
+WORKDIR /workspace
+
+all:
+  COPY +bootloader/ ./dist/
+  COPY +linux/ ./dist/
+  SAVE ARTIFACT ./dist/* AS LOCAL dist/ 
+
+linux:
+  COPY +linux-trixie/ ./
+  SAVE ARTIFACT *.deb AS LOCAL ./dist/
+
+linux-trixie:
+  FROM ../base+linux-trixie
+  ENV ARCH=riscv
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  COPY linux/patches-6.11 ./patches/
+  RUN for p in ./patches/*.patch; do git apply $p; done && rm -rf ./patches
+  COPY linux/config-6.11 .config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-immutos-milkv-duo bindeb-pkg
+  WORKDIR /workspace
+  RUN mv linux-image-${KERNELVERSION}-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb unmerged.deb
+  DO ../../util+USR_MERGE --src=unmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb
+  DO ../../util+META_PACKAGE --name=linux-image-immutos-milkv-duo --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-milkv-duo" --arch=riscv64
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
+  SAVE ARTIFACT linux-image-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
+
+bootloader:
+  FROM ../base+linux-trixie
+  WORKDIR /workspace/sophgo-fsbl
+  COPY ../../vendor+sophgo-fsbl/ ./
+  COPY fsbl/cvi_board_memmap.h ./plat/cv180x/include/
+  COPY ./fsbl/debian ./debian
+  RUN tar -czf ../sophgo-fsbl_4.1.6.orig.tar.gz --exclude-vcs .
+  COPY +u-boot/u-boot.bin ../u-boot/
+  COPY +opensbi/fw_dynamic.bin ../opensbi/build/platform/generic/firmware/
+  ENV BOOT_CPU=riscv
+  ENV CHIP_ARCH=cv180x
+  # Watch out for DDR_CFG, it's important.
+  ENV DDR_CFG=ddr2_1333_x16
+  # None of the default hardening flags for this.
+  RUN DEB_CPPFLAGS_SET= DEB_CFLAGS_SET= DEB_LDFLAGS_SET= \
+    DEB_CXXFLAGS_SET= DEB_FFLAGS_SET= \
+    dpkg-buildpackage -a riscv64 -us -uc
+  SAVE ARTIFACT /workspace/*.deb AS LOCAL ./dist/
+
+opensbi:
+  FROM ../base+bootloader
+  WORKDIR /workspace/opensbi
+  COPY +u-boot/cv1800b-milkv-duo.dtb ../u-boot/
+  COPY opensbi/config ./build/platform/generic/kconfig/.config
+  RUN make CROSS_COMPILE=riscv64-linux-gnu- PLATFORM=generic FW_FDT_PATH=../u-boot/cv1800b-milkv-duo.dtb -j$(nproc)
+  SAVE ARTIFACT ./build/platform/generic/firmware/fw_dynamic.bin
+
+u-boot:
+  FROM ../base+bootloader
+  WORKDIR /workspace/u-boot
+  COPY u-boot/patches/ ./patches/
+  RUN for p in ./patches/*.patch; do patch -p1 < $p; done && rm -rf ./patches
+  COPY u-boot/config .config
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  SAVE ARTIFACT u-boot.bin
+  SAVE ARTIFACT ./arch/riscv/dts/cv1800b-milkv-duo.dtb
