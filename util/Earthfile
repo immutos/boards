@@ -3,19 +3,18 @@ VERSION 0.8
 # Perform a Debian UsrMerge on a package.
 USR_MERGE:
   FUNCTION
-  ARG src
-  ARG dst
-  RUN src=$(realpath "${src}") \
-    && dst=$(realpath "${dst}") \
+  ARG package
+  RUN package=$(realpath "${package}") \
     && workdir=$(mktemp -d) \
     && cd "${workdir}" \
-    && dpkg-deb -x "${src}" . \
-    && dpkg-deb --control "${src}" \
+    && dpkg-deb -x "${package}" . \
+    && dpkg-deb --control "${package}" \
     && mkdir -p usr \
     && rsync -avh $(find . -maxdepth 1 -name bin -or -name sbin -or -name lib -or -name lib32 -or -name lib64 -or -name libo32 -or -name libx32) usr/ \
     && rm -rf bin sbin lib lib32 lib64 libo32 libx32 \
-    && dpkg-deb --build . "${dst}"
+    && dpkg-deb --build . "${package}"
 
+# Create a Debian meta package (eg. an empty package that depends on another package).
 META_PACKAGE:
   FUNCTION
   ARG name
@@ -33,3 +32,19 @@ META_PACKAGE:
     && echo "Description: Linux kernel meta package" >> DEBIAN/control \
     && echo "Depends: ${depends}" >> DEBIAN/control \
     && dpkg-deb --build . "${outputdir}/${name}_${version}_${arch}.deb"
+
+# Setup symlinks for the kernel (eg. vmlinuz and dtb).
+# Only one kernel version can be installed at a time in an immutos image.
+KERNEL_SYMLINKS:
+  FUNCTION
+  ARG package
+  RUN package=$(realpath "${package}") \
+    && version=$(dpkg-deb --info "${package}" | grep Package | awk '{print $2}') \
+    && workdir=$(mktemp -d) \
+    && cd "${workdir}" \
+    && dpkg-deb -x "${package}" . \
+    && dpkg-deb --control "${package}" \
+    && mkdir -p boot \
+    && ln -s "../usr/lib/${version}" boot/dtb \
+    && ln -s "boot/vmlinuz-$(echo $version | sed 's/^linux-image-//')" vmlinuz \
+    && dpkg-deb --build . "${package}"

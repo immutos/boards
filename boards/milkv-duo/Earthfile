@@ -12,23 +12,32 @@ linux:
   SAVE ARTIFACT *.deb AS LOCAL ./dist/
 
 linux-trixie:
-  FROM ../base+linux-trixie
+  FROM ../../linux+linux-trixie
   ENV ARCH=riscv
   ENV CROSS_COMPILE=riscv64-linux-gnu-
   COPY linux/patches-6.11 ./patches/
-  RUN for p in ./patches/*.patch; do git apply $p; done && rm -rf ./patches
-  COPY linux/config-6.11 .config
+  RUN for p in ./patches/*.patch; do patch -p1 < $p; done && rm -rf ./patches
+  COPY linux/milkv-duo-6.11.config ./arch/riscv/configs/milkv_duo
+  RUN ./scripts/kconfig/merge_config.sh \
+    arch/riscv/configs/defconfig \
+    kernel/configs/embedded.config \
+    kernel/configs/ethernet.config \
+    kernel/configs/mmc.config \
+    kernel/configs/usb.config \
+    kernel/configs/usb-gadget.config \
+    kernel/configs/usb-wlan.config \
+    arch/riscv/configs/milkv_duo
   RUN make oldconfig
   RUN make -j $(nproc) LOCALVERSION=-immutos-milkv-duo bindeb-pkg
   WORKDIR /workspace
-  RUN mv linux-image-${KERNELVERSION}-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb unmerged.deb
-  DO ../../util+USR_MERGE --src=unmerged.deb --dst=linux-image-${KERNELVERSION}-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb
+  DO ../../util+USR_MERGE --package=linux-image-${KERNELVERSION}-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb
+  DO ../../util+KERNEL_SYMLINKS --package=linux-image-${KERNELVERSION}-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb
   DO ../../util+META_PACKAGE --name=linux-image-immutos-milkv-duo --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-milkv-duo" --arch=riscv64
   SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
   SAVE ARTIFACT linux-image-immutos-milkv-duo_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
 
 bootloader:
-  FROM ../base+linux-trixie
+  FROM ../../linux+linux-trixie
   WORKDIR /workspace/sophgo-fsbl
   COPY ../../vendor+sophgo-fsbl/ ./
   COPY fsbl/cvi_board_memmap.h ./plat/cv180x/include/
@@ -47,16 +56,14 @@ bootloader:
   SAVE ARTIFACT /workspace/*.deb AS LOCAL ./dist/
 
 opensbi:
-  FROM ../base+bootloader
-  WORKDIR /workspace/opensbi
+  FROM ../../bootloader+opensbi
   COPY +u-boot/cv1800b-milkv-duo.dtb ../u-boot/
   COPY opensbi/config ./build/platform/generic/kconfig/.config
   RUN make CROSS_COMPILE=riscv64-linux-gnu- PLATFORM=generic FW_FDT_PATH=../u-boot/cv1800b-milkv-duo.dtb -j$(nproc)
   SAVE ARTIFACT ./build/platform/generic/firmware/fw_dynamic.bin
 
 u-boot:
-  FROM ../base+bootloader
-  WORKDIR /workspace/u-boot
+  FROM ../../bootloader+u-boot
   COPY u-boot/patches/ ./patches/
   RUN for p in ./patches/*.patch; do patch -p1 < $p; done && rm -rf ./patches
   COPY u-boot/config .config

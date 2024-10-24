@@ -1,0 +1,76 @@
+From: Alexandre Ghiti <alexghiti@rivosinc.com>
+Subject: [PATCH -fixes] riscv: Do not use fortify in early code
+Date: Wed,  9 Oct 2024 09:27:49 +0200
+
+Early code designates the code executed when the MMU is not yet enabled,
+and this comes with some limitations (see
+Documentation/arch/riscv/boot.rst, section "Pre-MMU execution").
+
+FORTIFY_SOURCE must be disabled then since it can trigger kernel panics
+as reported in [1].
+
+Reported-by: Jason Montleon <jmontleo@redhat.com>
+Closes: https://lore.kernel.org/linux-riscv/CAJD_bPJes4QhmXY5f63GHV9B9HFkSCoaZjk-qCT2NGS7Q9HODg@mail.gmail.com/ [1]
+Fixes: a35707c3d850 ("riscv: add memory-type errata for T-Head")
+Fixes: 26e7aacb83df ("riscv: Allow to downgrade paging mode from the command line")
+Upstream-Status: Backport [https://git.kernel.org/riscv/c/d49320974c4e]
+Signed-off-by: Alexandre Ghiti <alexghiti@rivosinc.com>
+---
+ arch/riscv/errata/Makefile    | 6 ++++++
+ arch/riscv/kernel/Makefile    | 5 +++++
+ arch/riscv/kernel/pi/Makefile | 6 +++++-
+ 3 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/arch/riscv/errata/Makefile b/arch/riscv/errata/Makefile
+index 8a2739485123..f0da9d7b39c3 100644
+--- a/arch/riscv/errata/Makefile
++++ b/arch/riscv/errata/Makefile
+@@ -2,6 +2,12 @@
+ KBUILD_CFLAGS += -fno-pie
+ endif
+ 
++ifdef CONFIG_RISCV_ALTERNATIVE_EARLY
++ifdef CONFIG_FORTIFY_SOURCE
++KBUILD_CFLAGS += -D__NO_FORTIFY
++endif
++endif
++
+ obj-$(CONFIG_ERRATA_ANDES) += andes/
+ obj-$(CONFIG_ERRATA_SIFIVE) += sifive/
+ obj-$(CONFIG_ERRATA_THEAD) += thead/
+diff --git a/arch/riscv/kernel/Makefile b/arch/riscv/kernel/Makefile
+index 7f88cc4931f5..69dc8aaab3fb 100644
+--- a/arch/riscv/kernel/Makefile
++++ b/arch/riscv/kernel/Makefile
+@@ -36,6 +36,11 @@
+ KASAN_SANITIZE_cpufeature.o := n
+ KASAN_SANITIZE_sbi_ecall.o := n
+ endif
++ifdef CONFIG_FORTIFY_SOURCE
++CFLAGS_alternative.o += -D__NO_FORTIFY
++CFLAGS_cpufeature.o += -D__NO_FORTIFY
++CFLAGS_sbi_ecall.o += -D__NO_FORTIFY
++endif
+ endif
+ 
+ extra-y += vmlinux.lds
+diff --git a/arch/riscv/kernel/pi/Makefile b/arch/riscv/kernel/pi/Makefile
+index d5bf1bc7de62..81d69d45c06c 100644
+--- a/arch/riscv/kernel/pi/Makefile
++++ b/arch/riscv/kernel/pi/Makefile
+@@ -15,8 +15,12 @@
+ KBUILD_CFLAGS	+= -mcmodel=medany
+ 
+ CFLAGS_cmdline_early.o += -D__NO_FORTIFY
++# lib/string.c already defines __NO_FORTIFY
++CFLAGS_ctype.o += -D__NO_FORTIFY
++CFLAGS_lib-fdt.o += -D__NO_FORTIFY
+ CFLAGS_lib-fdt_ro.o += -D__NO_FORTIFY
+-
++CFLAGS_archrandom_early.o += -D__NO_FORTIFY
++ 
+ $(obj)/%.pi.o: OBJCOPYFLAGS := --prefix-symbols=__pi_ \
+ 			       --remove-section=.note.gnu.property \
+ 			       --prefix-alloc-sections=.init.pi
+-- 
+2.39.2

@@ -27,12 +27,10 @@ linux-trixie:
     && tar -xf /usr/src/linux-source-6.11.tar.xz -C /workspace
   WORKDIR /workspace/linux-source-6.11
   ENV KERNELVERSION=$(make kernelversion)
-  COPY linux/patches-6.11 ./patches/
-  RUN for p in ./patches/*.patch; do git apply $p; done && rm -rf ./patches
-
-bootloader:
-  FROM +linux-bookworm
-  WORKDIR /workspace
-  GIT CLONE --branch=24.08 https://github.com/coreboot/coreboot.git coreboot
-  GIT CLONE --branch=v1.5.1 https://github.com/riscv-software-src/opensbi.git opensbi
-  GIT CLONE --branch=v2024.07 https://github.com/u-boot/u-boot.git u-boot
+  COPY ./patches-6.11 ./patches/
+  RUN for p in ./patches/*.patch; do patch -p1 < $p; done && rm -rf ./patches
+  RUN rm arch/x86/configs/x86_64_defconfig
+  COPY ./configs-6.11/arch/amd64_defconfig ./arch/x86/configs/defconfig
+  COPY ./configs-6.11/arch/arm64_defconfig ./arch/arm64/configs/defconfig
+  COPY ./configs-6.11/arch/riscv64_defconfig ./arch/riscv/configs/defconfig
+  COPY ./configs-6.11/*.config ./kernel/configs/
