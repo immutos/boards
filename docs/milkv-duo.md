@@ -14,18 +14,52 @@ and U-Boot.
 ### linux-image-immutos-milkv-duo
 
 Contains a minimal Linux kernel image for the Milk-V Duo based on the mainline
-6.11.x kernel.
+kernel.
 
-Support includes:
+## Supported Features
 
-* MMC/SD card
-* USB Host/Peripheral
-* Ethernet
-* UART
-* SPI
-* I2C
-* GPIO
+### CPU Subsystem
 
-Currently the coprocessor, and audio/visual subsystems are not supported.
+- [x] C906
+- [ ] C906L RTOS Core
+- [ ] 8051 MCU
+- [x] Reset and Clock Control
+- [x] DMA Controller
+- [ ] Thermal Sensor
+- [ ] Real Time Clock
+- [ ] Watchdog Timer
 
+### High Speed Peripherals
 
+- [x] USB 2.0 (OTG with DMA support)
+- [x] Ethernet 10/100Mbps and PHY
+- [ ] SPI NOR Flash
+- [ ] SPI NAND Flash
+- [x] MMC/SD
+
+### Peripherals
+
+- [x] I2C
+- [x] SPI
+- [x] GPIO
+- [ ] SAR ADC
+- [ ] PWM
+- [x] UART
+- [ ] Key Scan
+- [ ] Wiegand
+
+### Video and Audio Subsystem
+
+- [ ] MIPI Video Input 
+- [ ] Video Processing Subsystem
+- [ ] H.265/H.264/MJPEG Encoder
+- [ ] Integrated Audio CODEC
+
+### Hardware Accelerators
+
+- [ ] Security System Module
+- [ ] Tensor Processing Unit (TPU)
+  
+## Upstreaming
+
+SOPHGO's progress on upstreaming CV18xx SoC support to the mainline Linux kernel can be tracked [here](https://github.com/sophgo/linux/wiki).
