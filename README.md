@@ -1,4 +1,4 @@
-# boards
+# Immutos Board Support Packages
 
 Board support packages for various platforms.
 
