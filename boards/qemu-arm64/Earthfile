@@ -1,0 +1,47 @@
+VERSION 0.8
+FROM debian:bookworm
+WORKDIR /workspace
+
+linux-bookworm:
+  FROM ../../linux+linux-bookworm
+  ENV ARCH=arm64
+  ENV CROSS_COMPILE=aarch64-linux-gnu-
+  COPY linux/qemu-arm64-6.1.config ./arch/arm64/configs/qemu-arm64.config
+  RUN ./scripts/kconfig/merge_config.sh \
+    arch/arm64/configs/defconfig \
+    kernel/configs/ethernet.config \
+    kernel/configs/kvm_guest.config \
+    arch/arm64/configs/qemu-arm64.config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
+  WORKDIR /workspace
+  DO ../../util+KERNEL_SYMLINKS --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_arm64.deb
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_arm64.deb AS LOCAL ./dist/
+
+linux-trixie:
+  FROM ../../linux+linux-trixie
+  ENV ARCH=arm64
+  ENV CROSS_COMPILE=aarch64-linux-gnu-
+  COPY linux/qemu-arm64-6.11.config ./arch/arm64/configs/qemu-arm64.config
+  RUN ./scripts/kconfig/merge_config.sh \
+    arch/arm64/configs/defconfig \
+    kernel/configs/ethernet.config \
+    kernel/configs/kvm_guest.config \
+    arch/arm64/configs/qemu-arm64.config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
+  WORKDIR /workspace
+  DO ../../util+USR_MERGE --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_arm64.deb
+  DO ../../util+KERNEL_SYMLINKS --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_arm64.deb
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_arm64.deb AS LOCAL ./dist/
+
+bootloader:
+  FROM ../../bootloader+u-boot
+  WORKDIR /workspace/u-boot
+  COPY u-boot/patches/ ./patches/
+  RUN for p in ./patches/*.diff; do patch -p1 < $p; done && rm -rf ./patches
+  COPY u-boot/config .config
+  ENV CROSS_COMPILE=aarch64-linux-gnu-
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  SAVE ARTIFACT u-boot.bin AS LOCAL dist/bios.bin

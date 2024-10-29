@@ -1,0 +1,54 @@
+VERSION 0.8
+FROM debian:bookworm
+WORKDIR /workspace
+
+linux-bookworm:
+  FROM ../../linux+linux-bookworm
+  COPY linux/qemu-amd64-6.1.config ./arch/x86/configs/qemu-amd64.config
+  RUN ./scripts/kconfig/merge_config.sh \
+    arch/x86/configs/defconfig \
+    kernel/configs/ethernet.config \
+    kernel/configs/kvm_guest.config \
+    arch/x86/configs/qemu-amd64.config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
+  WORKDIR /workspace
+  DO ../../util+KERNEL_SYMLINKS --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_amd64.deb
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_amd64.deb AS LOCAL ./dist/
+
+linux-trixie:
+  FROM ../../linux+linux-trixie
+  COPY linux/qemu-amd64-6.11.config ./arch/x86/configs/qemu-amd64.config
+  RUN ./scripts/kconfig/merge_config.sh \
+    arch/x86/configs/defconfig \
+    kernel/configs/ethernet.config \
+    kernel/configs/kvm_guest.config \
+    arch/x86/configs/qemu-amd64.config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
+  WORKDIR /workspace
+  DO ../../util+USR_MERGE --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_amd64.deb
+  DO ../../util+KERNEL_SYMLINKS --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_amd64.deb
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_amd64.deb AS LOCAL ./dist/
+
+# U-Boot as a coreboot payload (coreboot is needed for HW acceleration support).
+bootloader:
+  FROM ../../bootloader+coreboot
+  RUN ln -s /usr/bin/python3 /usr/bin/python
+  RUN make crossgcc-i386 CPUS=$(nproc)
+  COPY coreboot/config .config
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  ENV PATH=$PATH:/workspace/coreboot/build/util/cbfstool
+  COPY +u-boot/u-boot.bin ../u-boot/
+  RUN cbfstool build/coreboot.rom remove -n fallback/payload \
+    && cbfstool build/coreboot.rom add-flat-binary -f ../u-boot/u-boot.bin \
+      -n fallback/payload -c lzma -l 0x1110000 -e 0x1110000
+  SAVE ARTIFACT build/coreboot.rom AS LOCAL dist/bios.bin
+
+u-boot:
+  FROM ../../bootloader+u-boot
+  COPY u-boot/config .config
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  SAVE ARTIFACT u-boot.bin

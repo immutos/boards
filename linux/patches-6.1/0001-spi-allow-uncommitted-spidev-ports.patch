@@ -1,0 +1,36 @@
+From 9fc74481c46cce819fbe0cf1852806935f87f492 Mon Sep 17 00:00:00 2001
+From: Damian Peckett <damian@pecke.tt>
+Date: Thu, 17 Oct 2024 12:10:11 +0200
+Subject: [PATCH] spi: allow uncommitted spidev ports
+
+This patch adds a generic string for the spidev device tree node.
+
+Upstream-Status: Inappropriate [https://patchwork.kernel.org/project/spi-devel-general/patch/1427499742-26916-1-git-send-email-broonie@kernel.org/]
+Signed-off-by: Damian Peckett <damian@pecke.tt>
+---
+ drivers/spi/spidev.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+index 81a3cf925..1b20b2db4 100644
+--- a/drivers/spi/spidev.c
++++ b/drivers/spi/spidev.c
+@@ -692,6 +692,7 @@ static const struct file_operations spidev_fops = {
+ static struct class *spidev_class;
+ 
+ static const struct spi_device_id spidev_spi_ids[] = {
++	{ .name = "spidev" },
+ 	{ .name = "bh2228fv" },
+ 	{ .name = "dh2228fv" },
+ 	{ .name = "jg10309-01" },
+@@ -721,6 +722,7 @@ static int spidev_of_check(struct device *dev)
+ }
+ 
+ static const struct of_device_id spidev_dt_ids[] = {
++	{ .compatible = "linux,spidev", .data = &spidev_of_check },
+ 	{ .compatible = "cisco,spi-petra", .data = &spidev_of_check },
+ 	{ .compatible = "dh,dhcom-board", .data = &spidev_of_check },
+ 	{ .compatible = "elgin,jg10309-01", .data = &spidev_of_check },
+-- 
+2.39.5
+

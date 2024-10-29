@@ -1,0 +1,17 @@
+Source: u-boot
+Section: admin
+Priority: optional
+Maintainer: Damian Peckett <damian@pecke.tt>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+Standards-Version: 4.6.2
+Homepage: https://github.com/sophgo/fsbl
+
+Package: immutos-u-boot-qemu
+Architecture: all
+Depends: ${misc:Depends}
+Description: This package includes boot loaders for qemu/kvm.
+ This package includes boot loaders for qemu/kvm.
+ .
+ Included architectures include amd64, arm64 and riscv64.

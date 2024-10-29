@@ -5,6 +5,9 @@ Board support packages for various platforms.
 ## Supported Platforms
 
 - [Milk-V Duo](./docs/milkv-duo.md)
+- [QEMU AMD64](./docs/qemu-amd64.md)
+- [QEMU ARM64](./docs/qemu-arm64.md)
+- [QEMU RISC-V](./docs/qemu-riscv.md)
 
 ## License
 

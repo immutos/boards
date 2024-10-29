@@ -1,0 +1,21 @@
+diff -u -r a/include/configs/qemu-arm.h b/include/configs/qemu-arm.h
+--- a/include/configs/qemu-arm.h	2024-10-02 17:03:32.543957473 +0200
++++ b/include/configs/qemu-arm.h	2024-10-02 17:04:13.495956441 +0200
+@@ -11,4 +11,17 @@
+ 
+ /* For timer, QEMU emulates an ARMv7/ARMv8 architected timer */
+ 
++/* Environment options */
++
++#define BOOT_TARGET_DEVICES(func) \
++        func(VIRTIO, virtio, 0) \
++        func(VIRTIO, virtio, 1) 
++
++#include <config_distro_bootcmd.h>
++
++#define CFG_EXTRA_ENV_SETTINGS \
++        "kernel_comp_addr_r=0x42400000\0" \
++        "kernel_comp_size=0x2000000\0" \
++        BOOTENV
++
+ #endif /* __CONFIG_H */

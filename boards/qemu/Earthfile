@@ -1,0 +1,41 @@
+VERSION 0.8
+FROM debian:bookworm
+WORKDIR /workspace
+
+all:
+  COPY +bootloader/ ./
+  COPY +linux/ ./
+  SAVE ARTIFACT *.deb AS LOCAL dist/ 
+
+linux:
+  COPY +linux-bookworm/ ./
+  COPY +linux-trixie/ ./
+  SAVE ARTIFACT *.deb AS LOCAL ./dist/
+
+linux-bookworm:
+  FROM ../../linux+linux-bookworm
+  WORKDIR /workspace
+  COPY ../qemu-amd64+linux-bookworm/ ./
+  COPY ../qemu-arm64+linux-bookworm/ ./
+  COPY ../qemu-riscv64+linux-bookworm/ ./
+  DO ../../util+META_PACKAGE --name=linux-image-immutos-qemu --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-qemu" --arch=all
+  SAVE ARTIFACT *.deb AS LOCAL ./dist/
+
+linux-trixie:
+  FROM ../../linux+linux-trixie
+  WORKDIR /workspace
+  COPY ../qemu-amd64+linux-trixie/ ./
+  COPY ../qemu-arm64+linux-trixie/ ./
+  COPY ../qemu-riscv64+linux-trixie/ ./
+  DO ../../util+META_PACKAGE --name=linux-image-immutos-qemu --version=${KERNELVERSION}-1 --depends="linux-image-${KERNELVERSION}-immutos-qemu" --arch=all
+  SAVE ARTIFACT *.deb AS LOCAL ./dist/
+
+bootloader:
+  FROM ../../bootloader+u-boot
+  COPY ./u-boot/debian ./debian
+  RUN tar -czf ../u-boot_2024.07.orig.tar.gz --exclude-vcs .
+  COPY ../qemu-amd64+bootloader/coreboot.rom ./bios-amd64.bin
+  COPY ../qemu-arm64+bootloader/u-boot.bin ./bios-arm64.bin
+  COPY ../qemu-riscv64+bootloader/u-boot.bin ./bios-riscv64.bin
+  RUN dpkg-buildpackage -us -uc
+  SAVE ARTIFACT /workspace/immutos-u-boot-qemu_2024.07-1_all.deb AS LOCAL ./dist/

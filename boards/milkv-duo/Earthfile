@@ -3,9 +3,9 @@ FROM debian:bookworm
 WORKDIR /workspace
 
 all:
-  COPY +bootloader/ ./dist/
-  COPY +linux/ ./dist/
-  SAVE ARTIFACT ./dist/* AS LOCAL dist/ 
+  COPY +bootloader/ ./
+  COPY +linux/ ./
+  SAVE ARTIFACT *.deb AS LOCAL dist/ 
 
 linux:
   COPY +linux-trixie/ ./
@@ -17,7 +17,7 @@ linux-trixie:
   ENV CROSS_COMPILE=riscv64-linux-gnu-
   COPY linux/patches-6.11 ./patches/
   RUN for p in ./patches/*.patch; do patch -p1 < $p; done && rm -rf ./patches
-  COPY linux/milkv-duo-6.11.config ./arch/riscv/configs/milkv_duo
+  COPY linux/milkv-duo-6.11.config ./arch/riscv/configs/milkv-duo.config
   RUN ./scripts/kconfig/merge_config.sh \
     arch/riscv/configs/defconfig \
     kernel/configs/embedded.config \
@@ -26,7 +26,7 @@ linux-trixie:
     kernel/configs/usb.config \
     kernel/configs/usb-gadget.config \
     kernel/configs/usb-wlan.config \
-    arch/riscv/configs/milkv_duo
+    arch/riscv/configs/milkv-duo.config
   RUN make oldconfig
   RUN make -j $(nproc) LOCALVERSION=-immutos-milkv-duo bindeb-pkg
   WORKDIR /workspace

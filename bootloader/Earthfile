@@ -3,16 +3,16 @@ FROM debian:bookworm
 WORKDIR /workspace
 
 coreboot:
-  FROM ../linux+linux-bookworm
+  FROM ../util+bookworm-base
   GIT CLONE --branch=24.08 https://github.com/coreboot/coreboot.git /workspace/coreboot
   WORKDIR /workspace/coreboot
 
 opensbi:
-  FROM ../linux+linux-bookworm
+  FROM ../util+bookworm-base
   GIT CLONE --branch=v1.5.1 https://github.com/riscv-software-src/opensbi.git /workspace/opensbi
   WORKDIR /workspace/opensbi
 
 u-boot:
-  FROM ../linux+linux-bookworm
+  FROM ../util+bookworm-base
   GIT CLONE --branch=v2024.07 https://github.com/u-boot/u-boot.git /workspace/u-boot
   WORKDIR /workspace/u-boot

@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	@echo "Skipping clean"
+
+override_dh_auto_build:
+	@echo "Skipping build"
+
+override_dh_auto_test:
+	@echo "Skipping tests"
+
+override_dh_auto_install:
+	mkdir -p $(CURDIR)/debian/immutos-u-boot-qemu/usr/share/immutos-u-boot-qemu
+	install -m 644 $(CURDIR)/bios-amd64.bin $(CURDIR)/debian/immutos-u-boot-qemu/usr/share/immutos-u-boot-qemu/
+	install -m 644 $(CURDIR)/bios-arm64.bin $(CURDIR)/debian/immutos-u-boot-qemu/usr/share/immutos-u-boot-qemu/
+	install -m 644 $(CURDIR)/bios-riscv64.bin $(CURDIR)/debian/immutos-u-boot-qemu/usr/share/immutos-u-boot-qemu/

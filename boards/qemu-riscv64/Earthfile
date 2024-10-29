@@ -1,0 +1,45 @@
+VERSION 0.8
+FROM debian:bookworm
+WORKDIR /workspace
+
+linux-bookworm:
+  FROM ../../linux+linux-bookworm
+  ENV ARCH=riscv
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  COPY linux/qemu-riscv64-6.1.config ./arch/riscv/configs/qemu-riscv64.config
+  RUN ./scripts/kconfig/merge_config.sh \
+    arch/riscv/configs/defconfig \
+    kernel/configs/ethernet.config \
+    kernel/configs/kvm_guest.config \
+    arch/riscv/configs/qemu-riscv64.config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
+  WORKDIR /workspace
+  DO ../../util+KERNEL_SYMLINKS --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_riscv64.deb
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-immutos-qemu-1_riscv64.deb AS LOCAL ./dist/
+
+linux-trixie:
+  FROM ../../linux+linux-trixie
+  ENV ARCH=riscv
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  COPY linux/qemu-riscv64-6.11.config ./arch/riscv/configs/qemu-riscv64.config
+  RUN ./scripts/kconfig/merge_config.sh \
+    arch/riscv/configs/defconfig \
+    kernel/configs/ethernet.config \
+    kernel/configs/kvm_guest.config \
+    arch/riscv/configs/qemu-riscv64.config
+  RUN make oldconfig
+  RUN make -j $(nproc) LOCALVERSION=-immutos-qemu bindeb-pkg
+  WORKDIR /workspace
+  DO ../../util+USR_MERGE --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb
+  DO ../../util+KERNEL_SYMLINKS --package=linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb
+  SAVE ARTIFACT linux-image-${KERNELVERSION}-immutos-qemu_${KERNELVERSION}-1_riscv64.deb AS LOCAL ./dist/
+
+bootloader:
+  FROM ../../bootloader+u-boot
+  WORKDIR /workspace/u-boot
+  COPY u-boot/config .config
+  ENV CROSS_COMPILE=riscv64-linux-gnu-
+  RUN make oldconfig
+  RUN make -j$(nproc)
+  SAVE ARTIFACT u-boot.bin AS LOCAL dist/bios.bin
