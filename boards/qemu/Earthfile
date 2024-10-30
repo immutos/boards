@@ -33,9 +33,9 @@ linux-trixie:
 bootloader:
   FROM ../../bootloader+u-boot
   COPY ./u-boot/debian ./debian
-  RUN tar -czf ../u-boot_2024.07.orig.tar.gz --exclude-vcs .
+  RUN tar -czf ../u-boot_2024.10.orig.tar.gz --exclude-vcs .
   COPY ../qemu-amd64+bootloader/coreboot.rom ./bios-amd64.bin
   COPY ../qemu-arm64+bootloader/u-boot.bin ./bios-arm64.bin
   COPY ../qemu-riscv64+bootloader/u-boot.bin ./bios-riscv64.bin
   RUN dpkg-buildpackage -us -uc
-  SAVE ARTIFACT /workspace/immutos-u-boot-qemu_2024.07-1_all.deb AS LOCAL ./dist/
+  SAVE ARTIFACT /workspace/immutos-u-boot-qemu_2024.10-1_all.deb AS LOCAL ./dist/
