@@ -14,5 +14,5 @@ opensbi:
 
 u-boot:
   FROM ../util+bookworm-base
-  GIT CLONE --branch=v2024.07 https://github.com/u-boot/u-boot.git /workspace/u-boot
+  GIT CLONE --branch=v2024.10 https://github.com/u-boot/u-boot.git /workspace/u-boot
   WORKDIR /workspace/u-boot

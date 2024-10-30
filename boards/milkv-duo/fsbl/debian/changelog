@@ -1,4 +1,10 @@
-sophgo-fsbl (4.1.6-1) UNRELEASED; urgency=medium
+sophgo-fsbl (4.1.6-2) UNRELEASED; urgency=medium
+
+  * Upgraded U-Boot to version 2024.10.
+
+ -- Damian Peckett <damian@pecke.tt>  Wed, 30 Oct 2024 18:00:00 +0100
+
+sophgo-fsbl (4.1.6-1) stable
 
   * Initial release.
 

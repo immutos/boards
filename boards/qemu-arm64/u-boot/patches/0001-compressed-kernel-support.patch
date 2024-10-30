@@ -1,0 +1,38 @@
+From dc4192daf446e71d1f2d700b8b216c8b3e66bfb8 Mon Sep 17 00:00:00 2001
+From: Damian Peckett <damian@pecke.tt>
+Date: Wed, 30 Oct 2024 14:33:32 +0100
+Subject: [PATCH] feat: add support for booting compressed kernels on arm
+
+Add support for booting compressed kernels on arm.
+
+Upstream-Status: Inappropriate [project specific]
+Signed-off-by: Damian Peckett <damian@pecke.tt>
+---
+ include/configs/qemu-arm.h | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/include/configs/qemu-arm.h b/include/configs/qemu-arm.h
+index e296f398..229b3052 100644
+--- a/include/configs/qemu-arm.h
++++ b/include/configs/qemu-arm.h
+@@ -11,4 +11,17 @@
+ 
+ /* For timer, QEMU emulates an ARMv7/ARMv8 architected timer */
+ 
++/* Environment options */
++
++#define BOOT_TARGET_DEVICES(func) \
++        func(VIRTIO, virtio, 0) \
++        func(VIRTIO, virtio, 1) 
++
++#include <config_distro_bootcmd.h>
++
++#define CFG_EXTRA_ENV_SETTINGS \
++        "kernel_comp_addr_r=0x42400000\0" \
++        "kernel_comp_size=0x2000000\0" \
++        BOOTENV
++
+ #endif /* __CONFIG_H */
+-- 
+2.39.5
+
