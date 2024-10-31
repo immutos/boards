@@ -29,6 +29,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: artifacts
+        retention-days: 1
         path: |
           dist/*
   

@@ -20,7 +20,8 @@ linux-trixie:
   COPY linux/milkv-duo-6.11.config ./arch/riscv/configs/milkv-duo.config
   RUN ./scripts/kconfig/merge_config.sh \
     arch/riscv/configs/defconfig \
-    kernel/configs/embedded.config \
+    kernel/configs/hardening.config \
+    kernel/configs/tiny.config \
     kernel/configs/ethernet.config \
     kernel/configs/mmc.config \
     kernel/configs/usb.config \
