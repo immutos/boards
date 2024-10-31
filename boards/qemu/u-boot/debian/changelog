@@ -1,4 +1,10 @@
-u-boot (2024.10-1) UNRELEASED; urgency=medium
+u-boot (2024.10-2) UNRELEASED; urgency=medium
+
+  * Updated configuration to allow automatic boot.
+
+ -- Damian Peckett <damian@pecke.tt>  Thu, 31 Oct 2024 17:00:00 +0100
+
+u-boot (2024.10-1) stable
 
   * Upgraded U-Boot to fix issue on x86_64 platform.
 
