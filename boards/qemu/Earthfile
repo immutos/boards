@@ -38,4 +38,5 @@ bootloader:
   COPY ../qemu-arm64+bootloader/u-boot.bin ./bios-arm64.bin
   COPY ../qemu-riscv64+bootloader/u-boot.bin ./bios-riscv64.bin
   RUN dpkg-buildpackage -us -uc
-  SAVE ARTIFACT /workspace/immutos-u-boot-qemu_2024.10-1_all.deb AS LOCAL ./dist/
+  WORKDIR /workspace
+  SAVE ARTIFACT *.deb AS LOCAL ./dist/
