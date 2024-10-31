@@ -44,8 +44,9 @@ KERNEL_SYMLINKS:
     && cd "${workdir}" \
     && dpkg-deb -x "${package}" . \
     && dpkg-deb --control "${package}" \
-    && mkdir -p boot \
-    && ln -s "../usr/lib/${version}" boot/dtb \
+    && if [ -d "usr/lib/${version}" ] && [ "$(ls -A usr/lib/${version})" ]; then \
+         ln -s "../usr/lib/${version}" boot/dtb; \
+       fi \
     && ln -s "boot/vmlinuz-$(echo $version | sed 's/^linux-image-//')" vmlinuz \
     && dpkg-deb --build . "${package}"
 
