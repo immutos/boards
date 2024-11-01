@@ -14,7 +14,7 @@ CONFIG_BOOTSTD_FULL=y
 CONFIG_SHOW_BOOT_PROGRESS=y
 CONFIG_BOOTDELAY=0
 CONFIG_USE_BOOTARGS=y
-CONFIG_BOOTARGS="console=ttyS0,115200 root=/dev/vda rootwait ro"
+CONFIG_BOOTARGS="earlyprintk=ttyS0 console=ttyS0,115200 root=/dev/vda rootwait ro"
 CONFIG_BOOTCOMMAND="virtio scan; load virtio 0 ${kernel_addr_r} /vmlinuz; zboot ${kernel_addr_r}"
 CONFIG_PRE_CONSOLE_BUFFER=y
 CONFIG_SYS_CONSOLE_INFO_QUIET=y

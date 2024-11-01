@@ -16,7 +16,7 @@ CONFIG_SYS_BOOTM_LEN=0x4000000
 CONFIG_DISTRO_DEFAULTS=y
 CONFIG_BOOTDELAY=1
 CONFIG_USE_BOOTARGS=y
-CONFIG_BOOTARGS="console=ttyS0,115200 earlycon=sbi root=/dev/mmcblk0p2 rootwait ro"
+CONFIG_BOOTARGS="earlycon=sbi console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait ro"
 CONFIG_BOOTCOMMAND="load mmc 0:2 ${loadaddr} vmlinuz; load mmc 0:2 ${fdtcontroladdr} boot/dtb/sophgo/cv1800b-milkv-duo.dtb; booti ${loadaddr} - ${fdtcontroladdr};"
 CONFIG_USE_PREBOOT=y
 CONFIG_PREBOOT="setenv kernel_comp_addr_r 0x81080000; setenv kernel_comp_size 0x420000;"

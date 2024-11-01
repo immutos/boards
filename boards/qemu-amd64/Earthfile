@@ -9,6 +9,7 @@ linux-bookworm:
     arch/x86/configs/defconfig \
     kernel/configs/hardening.config \
     kernel/configs/hardening-extra.config \
+    arch/x86/configs/hardening.config \
     kernel/configs/ethernet.config \
     kernel/configs/kvm_guest.config \
     arch/x86/configs/qemu-amd64.config

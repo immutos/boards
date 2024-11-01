@@ -16,7 +16,7 @@ CONFIG_SYS_BOOTM_LEN=0x4000000
 CONFIG_DISTRO_DEFAULTS=y
 CONFIG_BOOTDELAY=0
 CONFIG_USE_BOOTARGS=y
-CONFIG_BOOTARGS="console=ttyS0,115200 earlycon=sbi root=/dev/vda rootwait ro"
+CONFIG_BOOTARGS="earlycon=sbi console=ttyS0,115200 root=/dev/vda rootwait ro"
 CONFIG_BOOTCOMMAND="virtio scan; load virtio 0 ${kernel_addr_r} vmlinuz; booti ${kernel_addr_r} - ${fdt_addr}"
 CONFIG_USE_PREBOOT=y
 CONFIG_PREBOOT="setenv fdt_addr ${fdtcontroladdr}; fdt addr ${fdtcontroladdr};"
