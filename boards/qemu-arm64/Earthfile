@@ -9,6 +9,8 @@ linux-bookworm:
   COPY linux/qemu-arm64-6.1.config ./arch/arm64/configs/qemu-arm64.config
   RUN ./scripts/kconfig/merge_config.sh \
     arch/arm64/configs/defconfig \
+    kernel/configs/hardening.config \
+    kernel/configs/hardening-extra.config \
     kernel/configs/ethernet.config \
     kernel/configs/kvm_guest.config \
     arch/arm64/configs/qemu-arm64.config
@@ -26,8 +28,8 @@ linux-trixie:
   RUN ./scripts/kconfig/merge_config.sh \
     arch/arm64/configs/defconfig \
     kernel/configs/hardening.config \
-    kernel/configs/hardening-extra.config \
     arch/arm64/configs/hardening.config \
+    kernel/configs/hardening-extra.config \
     kernel/configs/ethernet.config \
     kernel/configs/kvm_guest.config \
     arch/arm64/configs/qemu-arm64.config

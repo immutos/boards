@@ -27,6 +27,8 @@ linux-trixie:
   COPY linux/qemu-riscv64-6.11.config ./arch/riscv/configs/qemu-riscv64.config
   RUN ./scripts/kconfig/merge_config.sh \
     arch/riscv/configs/defconfig \
+    kernel/configs/hardening.config \
+    kernel/configs/hardening-extra.config \
     kernel/configs/ethernet.config \
     kernel/configs/kvm_guest.config \
     arch/riscv/configs/qemu-riscv64.config
