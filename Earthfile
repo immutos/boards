@@ -8,3 +8,7 @@ all:
   RUN cd dist && find . -type f | sort | xargs sha256sum >> ../SHA256SUMS
   SAVE ARTIFACT ./dist/* AS LOCAL dist/ 
   SAVE ARTIFACT ./SHA256SUMS AS LOCAL dist/SHA256SUMS
+
+clean:
+  LOCALLY
+  RUN find . -type d -name dist -exec rm -rf {} +
